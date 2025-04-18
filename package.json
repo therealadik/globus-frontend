@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate-api": "openapi-generator-cli generate -i openapi.json -g typescript-fetch -o src/api/generated --additional-properties=npmName=@api/generated,supportsES6=true,npmVersion=1.0.0,typescriptThreePlus=true"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.4",
@@ -17,6 +18,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
+    "@openapitools/openapi-generator-cli": "^2.19.1",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",

@@ -15,56 +15,54 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+.wave {
+  position: absolute;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1));
+  border-radius: 50%;
+  animation: waveMove 15s ease-in-out infinite;
+  opacity: 0.2;
+  filter: blur(20px);
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.wave-1 {
+  top: -50%;
+  left: -50%;
+  animation-delay: 0s;
+  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15));
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+.wave-2 {
+  top: -30%;
+  left: -30%;
+  animation-delay: -5s;
+  opacity: 0.15;
+  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1));
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+.wave-3 {
+  top: -10%;
+  left: -10%;
+  animation-delay: -10s;
+  opacity: 0.1;
+  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.05));
+}
+
+@keyframes waveMove {
+  0% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
   }
-  a:hover {
-    color: #747bff;
+  25% {
+    transform: translate(25%, 25%) rotate(90deg) scale(1.1);
   }
-  button {
-    background-color: #f9f9f9;
+  50% {
+    transform: translate(50%, 0) rotate(180deg) scale(1);
+  }
+  75% {
+    transform: translate(25%, -25%) rotate(270deg) scale(0.9);
+  }
+  100% {
+    transform: translate(0, 0) rotate(360deg) scale(1);
   }
 }
