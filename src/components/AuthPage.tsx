@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { authService } from '../api/services/authService';
+import { ErrorResponse, AuthenticationResponseDto } from '../api/generated/src/models';
 
 interface AuthFormData {
   username: string;
@@ -13,6 +14,7 @@ const AuthPage = () => {
     password: '',
   });
   const [error, setError] = useState<string | null>(null);
+  const [errorDetails, setErrorDetails] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,6 +28,7 @@ const AuthPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setErrorDetails([]);
     setLoading(true);
 
     try {
@@ -33,10 +36,31 @@ const AuthPage = () => {
         ? await authService.login(formData.username, formData.password)
         : await authService.register(formData.username, formData.password);
 
-      localStorage.setItem('authToken', response.token);
-      window.location.href = '/';
+      if (response && 'token' in response) {
+        localStorage.setItem('authToken', response.token);
+        localStorage.setItem('username', formData.username);
+        window.location.href = '/';
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Произошла ошибка');
+      if (err instanceof Error) {
+        try {
+          const errorResponse = JSON.parse(err.message) as ErrorResponse;
+          setError(errorResponse.message || 'Произошла ошибка');
+          
+          if (errorResponse.details && errorResponse.details.length > 0) {
+            setErrorDetails(errorResponse.details.map(detail => {
+              if (detail.field && detail.message) {
+                return `${detail.field}: ${detail.message}`;
+              }
+              return detail.message || detail.field || '';
+            }));
+          }
+        } catch (parseError) {
+          setError(err.message);
+        }
+      } else {
+        setError('Произошла неизвестная ошибка');
+      }
     } finally {
       setLoading(false);
     }
@@ -97,9 +121,16 @@ const AuthPage = () => {
                 />
               </div>
 
-              {error && (
+              {(error || errorDetails.length > 0) && (
                 <div className="rounded-lg bg-red-500/20 p-4 border border-red-500/30">
-                  <div className="text-sm text-red-200">{error}</div>
+                  {error && <div className="text-sm text-red-200 font-medium mb-2">{error}</div>}
+                  {errorDetails.length > 0 && (
+                    <ul className="text-sm text-red-200 space-y-1">
+                      {errorDetails.map((detail, index) => (
+                        <li key={index}>{detail}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               )}
 
