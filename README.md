@@ -1,12 +1,89 @@
-# React + Vite
+# Globus Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Приложение для управления личными финансами с возможностью отслеживания доходов и расходов.
 
-Currently, two official plugins are available:
+## Требования
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Node.js (версия 18 или выше)
+- npm (версия 9 или выше)
+- Git
 
-## Expanding the ESLint configuration
+## Установка
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Windows
+
+1. Установите Node.js:
+   - Скачайте установщик с [официального сайта Node.js](https://nodejs.org/)
+   - Запустите установщик и следуйте инструкциям
+   - Проверьте установку, выполнив в командной строке:
+     ```bash
+     node --version
+     npm --version
+     ```
+
+2. Установите Git:
+   - Скачайте установщик с [официального сайта Git](https://git-scm.com/download/win)
+   - Запустите установщик и следуйте инструкциям
+
+### macOS
+
+1. Установите Node.js:
+   - Рекомендуется использовать Homebrew:
+     ```bash
+     brew install node
+     ```
+   - Или скачайте установщик с [официального сайта Node.js](https://nodejs.org/)
+   - Проверьте установку:
+     ```bash
+     node --version
+     npm --version
+     ```
+
+2. Git обычно предустановлен в macOS. Если нет, установите через Homebrew:
+   ```bash
+   brew install git
+   ```
+
+## Запуск проекта
+
+1. Клонируйте репозиторий:
+   ```bash
+   git clone <url-репозитория>
+   cd globus-frontend
+   ```
+
+2. Установите зависимости:
+   ```bash
+   npm install
+   ```
+
+3. Запустите приложение в режиме разработки:
+   ```bash
+   npm run dev
+   ```
+
+4. Откройте браузер и перейдите по адресу из консоли
+
+## Сборка для продакшена
+
+Для создания оптимизированной версии приложения выполните:
+```bash
+npm run build
+```
+
+Собранные файлы будут доступны в директории `dist/`.
+
+## Основные функции
+
+- Отслеживание доходов и расходов
+- Просмотр истории транзакций
+- Анализ финансовых показателей
+- Удобный интерфейс для добавления новых транзакций
+
+## Технологии
+
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- ESLint
