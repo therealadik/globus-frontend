@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authService } from '../api/services/authService';
-import { ErrorResponse, AuthenticationResponseDto } from '../api/generated/src/models';
+import authBg from '../assets/auth-bg.png';
+import { AuthenticationResponseDto } from '../api/generated/src/models';
+import ApiErrorViewer from '../components/ApiErrorViewer';
+import { ApiError } from '../types/api';
 
 interface AuthFormData {
   username: string;
@@ -13,9 +17,9 @@ const AuthPage = () => {
     username: '',
     password: '',
   });
-  const [error, setError] = useState<string | null>(null);
-  const [errorDetails, setErrorDetails] = useState<string[]>([]);
+  const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -28,38 +32,25 @@ const AuthPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setErrorDetails([]);
     setLoading(true);
 
     try {
-      const response = isLogin 
+      const response: AuthenticationResponseDto = isLogin
         ? await authService.login(formData.username, formData.password)
         : await authService.register(formData.username, formData.password);
 
-      if (response && 'token' in response) {
+      if (response.token) {
         localStorage.setItem('authToken', response.token);
         localStorage.setItem('username', formData.username);
         window.location.href = '/';
       }
-    } catch (err) {
-      if (err instanceof Error) {
-        try {
-          const errorResponse = JSON.parse(err.message) as ErrorResponse;
-          setError(errorResponse.message || 'Произошла ошибка');
-          
-          if (errorResponse.details && errorResponse.details.length > 0) {
-            setErrorDetails(errorResponse.details.map(detail => {
-              if (detail.field && detail.message) {
-                return `${detail.field}: ${detail.message}`;
-              }
-              return detail.message || detail.field || '';
-            }));
-          }
-        } catch (parseError) {
-          setError(err.message);
-        }
+    } catch (error) {
+      if (error && typeof error === 'object' && 'message' in error) {
+        setError(error as ApiError);
       } else {
-        setError('Произошла неизвестная ошибка');
+        setError({
+          message: 'Произошла неизвестная ошибка'
+        });
       }
     } finally {
       setLoading(false);
@@ -67,18 +58,13 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200">
-      {/* Wave animation background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="wave wave-1" />
-        <div className="wave wave-2" />
-        <div className="wave wave-3" />
-      </div>
-
-      {/* Main content */}
-      <div className="relative min-h-screen flex items-center justify-center p-4">
+    <div 
+      className="min-h-screen bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url(${authBg})` }}
+    >
+      <div className="relative min-h-screen flex items-center justify-center p-4 bg-black/10">
         <div className="w-full max-w-md">
-          <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-xl p-8 border border-white/20">
+          <div className="bg-white/30 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/20 hover:shadow-3xl transition-shadow duration-300">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-slate-800 mb-2">
                 {isLogin ? 'Добро пожаловать' : 'Создать аккаунт'}
@@ -121,18 +107,7 @@ const AuthPage = () => {
                 />
               </div>
 
-              {(error || errorDetails.length > 0) && (
-                <div className="rounded-lg bg-red-100 p-4 border border-red-200">
-                  {error && <div className="text-sm text-red-700 font-medium mb-2">{error}</div>}
-                  {errorDetails.length > 0 && (
-                    <ul className="text-sm text-red-700 space-y-1">
-                      {errorDetails.map((detail, index) => (
-                        <li key={index}>{detail}</li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              )}
+              <ApiErrorViewer error={error} />
 
               <button
                 type="submit"

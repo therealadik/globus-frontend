@@ -6,6 +6,15 @@ interface NavBarProps {
   onLogout: () => void;
 }
 
+function classNames(...classes: string[]) {
+  return classes.filter(Boolean).join(' ');
+}
+
+const navigation = [
+  { name: 'Обзор', href: '/', current: true },
+  { name: 'Транзакции', href: '/transactions', current: false },
+];
+
 const NavBar: React.FC<NavBarProps> = ({ username, onLogout }) => {
   const location = useLocation();
 
@@ -15,53 +24,40 @@ const NavBar: React.FC<NavBarProps> = ({ username, onLogout }) => {
 
   return (
     <nav className="bg-white shadow">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-10 py-3">
-        <div className="flex justify-between h-16">
-          <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
-              <Link to="/" className="text-xl font-bold text-indigo-600">
+      <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+        <div className="relative flex h-16 items-center justify-between">
+          <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+            <div className="flex shrink-0 items-center">
+              <Link to="/" className="text-xl font-bold text-gray-900">
                 Globus
               </Link>
             </div>
-            <div className="hidden sm:ml-8 sm:flex sm:space-x-4">
-              <Link
-                to="/"
-                className={`relative inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium ${
-                  isActive('/') ? 'text-white' : 'text-gray-700'
-                }`}
-              >
-                <span className="relative z-10">Обзор</span>
-                {isActive('/') && (
-                  <div className="absolute inset-0 bg-indigo-600 rounded-md" />
-                )}
-              </Link>
-              <Link
-                to="/transactions"
-                className={`relative inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium ${
-                  isActive('/transactions') ? 'text-white' : 'text-gray-700'
-                }`}
-              >
-                <span className="relative z-10">Транзакции</span>
-                {isActive('/transactions') && (
-                  <div className="absolute inset-0 bg-indigo-600 rounded-md" />
-                )}
-              </Link>
+            <div className="hidden sm:ml-6 sm:block">
+              <div className="flex space-x-4">
+                {navigation.map((item) => (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={classNames(
+                      isActive(item.href) ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                      'rounded-md px-3 py-2 text-sm font-medium'
+                    )}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
-          
-          <div className="flex items-center">
-            <div className="ml-4 flex items-center md:ml-6">
-              <div className="ml-3 relative">
-                <div className="flex items-center space-x-4">
-                  <span className="text-gray-700">{username}</span>
-                  <button
-                    onClick={onLogout}
-                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    Выйти
-                  </button>
-                </div>
-              </div>
+          <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+            <div className="flex items-center space-x-4">
+              <span className="text-gray-600">{username}</span>
+              <button
+                onClick={onLogout}
+                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                Выйти
+              </button>
             </div>
           </div>
         </div>

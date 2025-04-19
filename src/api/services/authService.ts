@@ -1,39 +1,46 @@
-import { Configuration } from '../generated/src/runtime';
+/// <reference types="vite/client" />
+
 import { AuthenticationControllerApi } from '../generated/src/apis';
-import { LoginRequestDto, RegistrationRequestDto, ErrorResponse } from '../generated/src/models';
+import { createAuthConfig } from '../config';
+import { LoginRequestDto, RegistrationRequestDto, AuthenticationResponseDto } from '../generated/src/models';
+import { handleApiError } from '../../utils/errorHandler';
+import { ApiError } from '../../types/api';
 
-const config = new Configuration({
-  basePath: 'http://localhost:8080',
-});
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
-const apiClient = new AuthenticationControllerApi(config);
-
-const handleApiError = async (error: any): Promise<never> => {
-  if (error.response) {
-    const errorData = await error.response.json();
-    throw new Error(JSON.stringify(errorData));
-  }
-  throw error;
-};
+const authApi = new AuthenticationControllerApi(createAuthConfig(API_BASE_URL));
 
 export const authService = {
-  login: async (username: string, password: string) => {
+  login: async (username: string, password: string): Promise<AuthenticationResponseDto> => {
     try {
       const loginDto: LoginRequestDto = { username, password };
-      const response = await apiClient.login({ loginRequestDto: loginDto });
+      const response = await authApi.login({ loginRequestDto: loginDto });
+      if (response.token) {
+        localStorage.setItem('authToken', response.token);
+      }
       return response;
     } catch (error) {
-      return handleApiError(error);
+      const apiError = await handleApiError(error);
+      throw apiError;
     }
   },
 
-  register: async (username: string, password: string) => {
+  logout: () => {
+    localStorage.removeItem('authToken');
+  },
+
+  isAuthenticated: () => {
+    return !!localStorage.getItem('authToken');
+  },
+
+  register: async (username: string, password: string): Promise<AuthenticationResponseDto> => {
     try {
       const registerDto: RegistrationRequestDto = { username, password };
-      const response = await apiClient.register({ registrationRequestDto: registerDto });
+      const response = await authApi.register({ registrationRequestDto: registerDto });
       return response;
     } catch (error) {
-      return handleApiError(error);
+      const apiError = await handleApiError(error);
+      throw apiError;
     }
-  },
+  }
 }; 

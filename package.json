@@ -11,10 +11,13 @@
     "generate-api": "openapi-generator-cli generate -i openapi.json -g typescript-fetch -o src/api/generated --additional-properties=npmName=@api/generated,supportsES6=true,npmVersion=1.0.0,typescriptThreePlus=true"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.2",
+    "@heroicons/react": "^2.2.0",
     "@tailwindcss/vite": "^4.1.4",
     "@types/react-router-dom": "^5.3.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-icons": "^5.5.0",
     "react-router-dom": "^7.5.1",
     "tailwindcss": "^4.1.4"
   },

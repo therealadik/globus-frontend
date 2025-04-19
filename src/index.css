@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+body {
+  background-color: rgba(255, 255, 255, 1);
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -13,56 +17,4 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-.wave {
-  position: absolute;
-  width: 200%;
-  height: 100%;
-  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1));
-  border-radius: 50%;
-  animation: waveMove 15s ease-in-out infinite;
-  opacity: 0.2;
-  filter: blur(20px);
-}
-
-.wave-1 {
-  top: -50%;
-  left: -50%;
-  animation-delay: 0s;
-  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15));
-}
-
-.wave-2 {
-  top: -30%;
-  left: -30%;
-  animation-delay: -5s;
-  opacity: 0.15;
-  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1));
-}
-
-.wave-3 {
-  top: -10%;
-  left: -10%;
-  animation-delay: -10s;
-  opacity: 0.1;
-  background: linear-gradient(45deg, transparent, rgba(255,255,255,0.05));
-}
-
-@keyframes waveMove {
-  0% {
-    transform: translate(0, 0) rotate(0deg) scale(1);
-  }
-  25% {
-    transform: translate(25%, 25%) rotate(90deg) scale(1.1);
-  }
-  50% {
-    transform: translate(50%, 0) rotate(180deg) scale(1);
-  }
-  75% {
-    transform: translate(25%, -25%) rotate(270deg) scale(0.9);
-  }
-  100% {
-    transform: translate(0, 0) rotate(360deg) scale(1);
-  }
 }

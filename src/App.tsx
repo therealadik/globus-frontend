@@ -1,9 +1,9 @@
 // @ts-ignore
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import AuthPage from './components/AuthPage';
-import HomePage from './components/HomePage';
-import Transactions from './components/Transactions';
+import AuthPage from './pages/AuthPage';
+import DashboardPage from './pages/DashboardPage';
+import TransactionsPage from './pages/TransactionsPage';
 
 const App = () => {
   const isAuthenticated = !!localStorage.getItem('authToken');
@@ -17,15 +17,15 @@ const App = () => {
         />
         <Route 
           path="/" 
-          element={isAuthenticated ? <HomePage /> : <Navigate to="/login" />} 
+          element={isAuthenticated ? <DashboardPage /> : <Navigate to="/login" />} 
         />
         <Route 
           path="/transactions" 
-          element={isAuthenticated ? <Transactions /> : <Navigate to="/login" />} 
+          element={isAuthenticated ? <TransactionsPage /> : <Navigate to="/login" />} 
         />
         <Route 
           path="/transactions/new" 
-          element={isAuthenticated ? <Transactions /> : <Navigate to="/login" />} 
+          element={isAuthenticated ? <TransactionsPage /> : <Navigate to="/login" />} 
         />
       </Routes>
     </Router>
