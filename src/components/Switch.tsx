@@ -3,36 +3,39 @@ import React, { useState, useEffect } from 'react';
 interface SwitchProps {
   leftLabel: string;
   rightLabel: string;
+  leftValue: string;
+  rightValue: string;
   value: string;
   onChange: (value: string) => void;
   className?: string;
+  disabled?: boolean;
 }
 
-const Switch: React.FC<SwitchProps> = ({ leftLabel, rightLabel, value, onChange, className = '' }) => {
-  const [isLeft, setIsLeft] = useState(value === leftLabel);
+const Switch: React.FC<SwitchProps> = ({ leftLabel, rightLabel, leftValue, rightValue, value, onChange, className = '', disabled = false }) => {
+  const [isLeft, setIsLeft] = useState(value === leftValue);
 
   useEffect(() => {
-    setIsLeft(value === leftLabel);
-  }, [value, leftLabel]);
+    setIsLeft(value === leftValue);
+  }, [value, leftValue]);
 
   const handleLeftClick = () => {
-    if (!isLeft) {
+    if (!isLeft && !disabled) {
       setIsLeft(true);
-      onChange(leftLabel);
+      onChange(leftValue);
     }
   };
 
   const handleRightClick = () => {
-    if (isLeft) {
+    if (isLeft && !disabled) {
       setIsLeft(false);
-      onChange(rightLabel);
+      onChange(rightValue);
     }
   };
 
   return (
-    <div className={`w-full rounded h-10 flex p-1 relative items-center bg-gray-200 ${className}`}>
+    <div className={`w-full rounded h-10 flex p-1 relative items-center bg-gray-200 ${className} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}>
       <div 
-        className="w-full flex justify-center cursor-pointer relative z-10"
+        className={`w-full flex justify-center relative z-10 ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
         onClick={handleLeftClick}
       >
         <span className={`text-sm font-medium ${isLeft ? 'text-white' : 'text-gray-700'}`}>
@@ -40,7 +43,7 @@ const Switch: React.FC<SwitchProps> = ({ leftLabel, rightLabel, value, onChange,
         </span>
       </div>
       <div 
-        className="w-full flex justify-center cursor-pointer relative z-10"
+        className={`w-full flex justify-center relative z-10 ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
         onClick={handleRightClick}
       >
         <span className={`text-sm font-medium ${!isLeft ? 'text-white' : 'text-gray-700'}`}>

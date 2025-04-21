@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { authService } from '../api/services/authService';
 import authBg from '../assets/auth-bg.png';
 import { AuthenticationResponseDto } from '../api/generated/src/models';
@@ -19,7 +18,6 @@ const AuthPage = () => {
   });
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -107,7 +105,7 @@ const AuthPage = () => {
                 />
               </div>
 
-              <ApiErrorViewer error={error} />
+              {error && <ApiErrorViewer error={error} />}
 
               <button
                 type="submit"

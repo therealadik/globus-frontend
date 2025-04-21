@@ -1,4 +1,5 @@
 import { Transaction } from './transaction';
+import { Bank, Category } from './common';
 
 export interface AppState {
   auth: {
@@ -15,4 +16,6 @@ export interface AppState {
     totalExpenses: number;
     balance: number;
   };
+  banks: Bank[];
+  categories: Category[];
 } 

@@ -1,10 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-
-interface NavBarProps {
-  username: string;
-  onLogout: () => void;
-}
+import { useAppState } from '../context/AppStateContext';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -13,9 +9,17 @@ function classNames(...classes: string[]) {
 const navigation = [
   { name: 'Обзор', href: '/', current: true },
   { name: 'Транзакции', href: '/transactions', current: false },
+  { name: 'Источники данных', href: '/data-sources', current: false },
 ];
 
-const NavBar: React.FC<NavBarProps> = ({ username, onLogout }) => {
+const NavBar: React.FC = () => {
+  const { appState } = useAppState();
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('username');
+    window.location.href = '/login';
+  };
+
   const location = useLocation();
 
   const isActive = (path: string) => {
@@ -51,9 +55,9 @@ const NavBar: React.FC<NavBarProps> = ({ username, onLogout }) => {
           </div>
           <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
             <div className="flex items-center space-x-4">
-              <span className="text-gray-600">{username}</span>
+              <span className="text-gray-600">{appState.auth.username}</span>
               <button
-                onClick={onLogout}
+                onClick={handleLogout}
                 className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
                 Выйти

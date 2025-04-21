@@ -4,16 +4,20 @@ import { ApiError } from '../types/api';
 export const handleApiError = async (error: any): Promise<ApiError> => {
   if (error.response) {
     try {
-      const errorData: ErrorResponse = await error.response.json();
-      const apiError: ApiError = {
+      // Clone the response before reading it
+      const response = error.response.clone();
+      const errorData: ErrorResponse = await response.json();
+      console.log('Error data from server:', errorData);
+      
+      return {
         message: errorData.message || `Ошибка ${error.response.status}`,
         details: errorData.details?.map(detail => ({
-          field: detail.field,
+          field: detail.field || '',
           message: detail.message || ''
         }))
       };
-      return apiError;
     } catch (e) {
+      console.error('Error parsing error response:', e);
       return {
         message: `Ошибка ${error.response.status}`
       };

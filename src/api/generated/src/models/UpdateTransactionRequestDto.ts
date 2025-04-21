@@ -16,79 +16,85 @@ import { mapValues } from '../runtime';
 /**
  * 
  * @export
- * @interface NewTransactionRequestDto
+ * @interface UpdateTransactionRequestDto
  */
-export interface NewTransactionRequestDto {
+export interface UpdateTransactionRequestDto {
+    /**
+     * 
+     * @type {number}
+     * @memberof UpdateTransactionRequestDto
+     */
+    id: number;
     /**
      * 
      * @type {string}
-     * @memberof NewTransactionRequestDto
+     * @memberof UpdateTransactionRequestDto
      */
-    personType: NewTransactionRequestDtoPersonTypeEnum;
+    personType: UpdateTransactionRequestDtoPersonTypeEnum;
     /**
      * 
      * @type {string}
-     * @memberof NewTransactionRequestDto
+     * @memberof UpdateTransactionRequestDto
      */
-    transactionType: NewTransactionRequestDtoTransactionTypeEnum;
+    transactionType: UpdateTransactionRequestDtoTransactionTypeEnum;
     /**
      * 
      * @type {Date}
-     * @memberof NewTransactionRequestDto
+     * @memberof UpdateTransactionRequestDto
      */
     transactionDate: Date;
     /**
      * 
      * @type {string}
-     * @memberof NewTransactionRequestDto
+     * @memberof UpdateTransactionRequestDto
      */
-    status: NewTransactionRequestDtoStatusEnum;
+    status: UpdateTransactionRequestDtoStatusEnum;
     /**
      * 
      * @type {number}
-     * @memberof NewTransactionRequestDto
+     * @memberof UpdateTransactionRequestDto
      */
     amount: number;
     /**
      * 
      * @type {number}
-     * @memberof NewTransactionRequestDto
+     * @memberof UpdateTransactionRequestDto
      */
     bankSenderId: number;
     /**
      * 
      * @type {number}
-     * @memberof NewTransactionRequestDto
+     * @memberof UpdateTransactionRequestDto
      */
     bankReceiverId: number;
     /**
      * 
      * @type {string}
-     * @memberof NewTransactionRequestDto
+     * @memberof UpdateTransactionRequestDto
      */
     innReceiver: string;
     /**
      * 
      * @type {string}
-     * @memberof NewTransactionRequestDto
+     * @memberof UpdateTransactionRequestDto
      */
     accountReceiver: string;
     /**
      * 
      * @type {string}
-     * @memberof NewTransactionRequestDto
+     * @memberof UpdateTransactionRequestDto
      */
     accountSender: string;
     /**
      * 
      * @type {number}
-     * @memberof NewTransactionRequestDto
+     * @memberof UpdateTransactionRequestDto
      */
     categoryId: number;
     /**
      * 
      * @type {string}
-     * @memberof NewTransactionRequestDto
+     * @memberof UpdateTransactionRequestDto
      */
     phoneReceiver: string;
 }
@@ -97,25 +103,25 @@ export interface NewTransactionRequestDto {
 /**
  * @export
  */
-export const NewTransactionRequestDtoPersonTypeEnum = {
+export const UpdateTransactionRequestDtoPersonTypeEnum = {
     Physical: 'PHYSICAL',
     Legal: 'LEGAL'
 } as const;
-export type NewTransactionRequestDtoPersonTypeEnum = typeof NewTransactionRequestDtoPersonTypeEnum[keyof typeof NewTransactionRequestDtoPersonTypeEnum];
+export type UpdateTransactionRequestDtoPersonTypeEnum = typeof UpdateTransactionRequestDtoPersonTypeEnum[keyof typeof UpdateTransactionRequestDtoPersonTypeEnum];
 
 /**
  * @export
  */
-export const NewTransactionRequestDtoTransactionTypeEnum = {
+export const UpdateTransactionRequestDtoTransactionTypeEnum = {
     Income: 'INCOME',
     Expense: 'EXPENSE'
 } as const;
-export type NewTransactionRequestDtoTransactionTypeEnum = typeof NewTransactionRequestDtoTransactionTypeEnum[keyof typeof NewTransactionRequestDtoTransactionTypeEnum];
+export type UpdateTransactionRequestDtoTransactionTypeEnum = typeof UpdateTransactionRequestDtoTransactionTypeEnum[keyof typeof UpdateTransactionRequestDtoTransactionTypeEnum];
 
 /**
  * @export
  */
-export const NewTransactionRequestDtoStatusEnum = {
+export const UpdateTransactionRequestDtoStatusEnum = {
     New: 'NEW',
     Confirmed: 'CONFIRMED',
     Processing: 'PROCESSING',
@@ -124,13 +130,14 @@ export const NewTransactionRequestDtoStatusEnum = {
     Deleted: 'DELETED',
     Returned: 'RETURNED'
 } as const;
-export type NewTransactionRequestDtoStatusEnum = typeof NewTransactionRequestDtoStatusEnum[keyof typeof NewTransactionRequestDtoStatusEnum];
+export type UpdateTransactionRequestDtoStatusEnum = typeof UpdateTransactionRequestDtoStatusEnum[keyof typeof UpdateTransactionRequestDtoStatusEnum];
 
 
 /**
- * Check if a given object implements the NewTransactionRequestDto interface.
+ * Check if a given object implements the UpdateTransactionRequestDto interface.
  */
-export function instanceOfNewTransactionRequestDto(value: object): value is NewTransactionRequestDto {
+export function instanceOfUpdateTransactionRequestDto(value: object): value is UpdateTransactionRequestDto {
+    if (!('id' in value) || value['id'] === undefined) return false;
     if (!('personType' in value) || value['personType'] === undefined) return false;
     if (!('transactionType' in value) || value['transactionType'] === undefined) return false;
     if (!('transactionDate' in value) || value['transactionDate'] === undefined) return false;
@@ -146,16 +153,17 @@ export function instanceOfNewTransactionRequestDto(value: object): value is NewT
     return true;
 }
 
-export function NewTransactionRequestDtoFromJSON(json: any): NewTransactionRequestDto {
-    return NewTransactionRequestDtoFromJSONTyped(json, false);
+export function UpdateTransactionRequestDtoFromJSON(json: any): UpdateTransactionRequestDto {
+    return UpdateTransactionRequestDtoFromJSONTyped(json, false);
 }
 
-export function NewTransactionRequestDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean): NewTransactionRequestDto {
+export function UpdateTransactionRequestDtoFromJSONTyped(json: any, ignoreDiscriminator: boolean): UpdateTransactionRequestDto {
     if (json == null) {
         return json;
     }
     return {
         
+        'id': json['id'],
         'personType': json['personType'],
         'transactionType': json['transactionType'],
         'transactionDate': (new Date(json['transactionDate'])),
@@ -171,17 +179,18 @@ export function NewTransactionRequestDtoFromJSONTyped(json: any, ignoreDiscrimin
     };
 }
 
-export function NewTransactionRequestDtoToJSON(json: any): NewTransactionRequestDto {
-    return NewTransactionRequestDtoToJSONTyped(json, false);
+export function UpdateTransactionRequestDtoToJSON(json: any): UpdateTransactionRequestDto {
+    return UpdateTransactionRequestDtoToJSONTyped(json, false);
 }
 
-export function NewTransactionRequestDtoToJSONTyped(value?: NewTransactionRequestDto | null, ignoreDiscriminator: boolean = false): any {
+export function UpdateTransactionRequestDtoToJSONTyped(value?: UpdateTransactionRequestDto | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
 
     return {
         
+        'id': value['id'],
         'personType': value['personType'],
         'transactionType': value['transactionType'],
         'transactionDate': ((value['transactionDate']).toISOString()),

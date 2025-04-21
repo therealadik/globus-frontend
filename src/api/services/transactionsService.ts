@@ -1,11 +1,12 @@
-import { Configuration } from '../generated/src/runtime';
+import { Configuration } from '../generated/src';
 import { TransactionControllerApi } from '../generated/src/apis';
-import { NewTransactionRequestDto } from '../generated/src/models';
+import { NewTransactionRequestDto, TransactionResponseDto } from '../generated/src/models';
 import { handleApiError } from '../../utils/errorHandler';
-import { ApiError } from '../../types/api';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
 const config = new Configuration({
-  basePath: 'http://localhost:8080',
+  basePath: API_BASE_URL,
   headers: {
     Authorization: `Bearer ${localStorage.getItem('authToken')}`
   }
@@ -14,10 +15,20 @@ const config = new Configuration({
 const apiClient = new TransactionControllerApi(config);
 
 export const transactionsService = {
-  create: async (transaction: NewTransactionRequestDto): Promise<void> => {
+  create: async (transaction: NewTransactionRequestDto): Promise<TransactionResponseDto> => {
     try {
-      await apiClient.create({ newTransactionRequestDto: transaction });
-    } catch (error) {
+      return await apiClient.create({ newTransactionRequestDto: transaction });
+    } catch (error: any) {
+      console.log('Raw error:', error);
+      const apiError = await handleApiError(error);
+      throw apiError;
+    }
+  },
+  update: async (id: number, transaction: NewTransactionRequestDto): Promise<TransactionResponseDto> => {
+    try {
+      return await apiClient.update({ id, newTransactionRequestDto: transaction });
+    } catch (error: any) {
+      console.log('Raw error:', error);
       const apiError = await handleApiError(error);
       throw apiError;
     }

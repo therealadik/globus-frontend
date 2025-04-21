@@ -1,7 +1,9 @@
+export interface ValidationError {
+  field: string;
+  message: string;
+}
+
 export interface ApiError {
   message: string;
-  details?: Array<{
-    field?: string;
-    message: string;
-  }>;
+  details?: ValidationError[];
 } 

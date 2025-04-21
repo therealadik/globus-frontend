@@ -4,7 +4,6 @@ import { AuthenticationControllerApi } from '../generated/src/apis';
 import { createAuthConfig } from '../config';
 import { LoginRequestDto, RegistrationRequestDto, AuthenticationResponseDto } from '../generated/src/models';
 import { handleApiError } from '../../utils/errorHandler';
-import { ApiError } from '../../types/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
