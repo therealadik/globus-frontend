@@ -19,16 +19,19 @@ export const transactionsService = {
     try {
       return await apiClient.create({ newTransactionRequestDto: transaction });
     } catch (error: any) {
-      console.log('Raw error:', error);
       const apiError = await handleApiError(error);
       throw apiError;
     }
   },
   update: async (id: number, transaction: NewTransactionRequestDto): Promise<TransactionResponseDto> => {
     try {
-      return await apiClient.update({ id, newTransactionRequestDto: transaction });
+      return await apiClient.updateTransaction({ 
+        updateTransactionRequestDto: {
+          ...transaction,
+          id
+        }
+      });
     } catch (error: any) {
-      console.log('Raw error:', error);
       const apiError = await handleApiError(error);
       throw apiError;
     }
