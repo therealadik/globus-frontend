@@ -17,6 +17,8 @@ import * as runtime from '../runtime';
 import type {
   ErrorResponse,
   NewTransactionRequestDto,
+  TransactionFilterDto,
+  TransactionFilterResponseDto,
   TransactionResponseDto,
   UpdateTransactionRequestDto,
 } from '../models/index';
@@ -25,6 +27,10 @@ import {
     ErrorResponseToJSON,
     NewTransactionRequestDtoFromJSON,
     NewTransactionRequestDtoToJSON,
+    TransactionFilterDtoFromJSON,
+    TransactionFilterDtoToJSON,
+    TransactionFilterResponseDtoFromJSON,
+    TransactionFilterResponseDtoToJSON,
     TransactionResponseDtoFromJSON,
     TransactionResponseDtoToJSON,
     UpdateTransactionRequestDtoFromJSON,
@@ -33,6 +39,14 @@ import {
 
 export interface CreateRequest {
     newTransactionRequestDto: NewTransactionRequestDto;
+}
+
+export interface DeleteTransactionRequest {
+    id: number;
+}
+
+export interface FindTransactionsByFilterRequest {
+    transactionFilterDto: TransactionFilterDto;
 }
 
 export interface UpdateTransactionRequest {
@@ -75,6 +89,98 @@ export class TransactionControllerApi extends runtime.BaseAPI {
      */
     async create(requestParameters: CreateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TransactionResponseDto> {
         const response = await this.createRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async deleteTransactionRaw(requestParameters: DeleteTransactionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        if (requestParameters['id'] == null) {
+            throw new runtime.RequiredError(
+                'id',
+                'Required parameter "id" was null or undefined when calling deleteTransaction().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/transaction/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     */
+    async deleteTransaction(requestParameters: DeleteTransactionRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.deleteTransactionRaw(requestParameters, initOverrides);
+    }
+
+    /**
+     */
+    async findTransactionsByFilterRaw(requestParameters: FindTransactionsByFilterRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TransactionFilterResponseDto>> {
+        if (requestParameters['transactionFilterDto'] == null) {
+            throw new runtime.RequiredError(
+                'transactionFilterDto',
+                'Required parameter "transactionFilterDto" was null or undefined when calling findTransactionsByFilter().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/transaction/filter`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: TransactionFilterDtoToJSON(requestParameters['transactionFilterDto']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => TransactionFilterResponseDtoFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async findTransactionsByFilter(requestParameters: FindTransactionsByFilterRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TransactionFilterResponseDto> {
+        const response = await this.findTransactionsByFilterRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     */
+    async getPdfReportRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/transaction/report/pdf`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<string>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
+    }
+
+    /**
+     */
+    async getPdfReport(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
+        const response = await this.getPdfReportRaw(initOverrides);
         return await response.value();
     }
 

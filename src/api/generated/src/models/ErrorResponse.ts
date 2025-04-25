@@ -35,6 +35,18 @@ export interface ErrorResponse {
     message?: string;
     /**
      * 
+     * @type {string}
+     * @memberof ErrorResponse
+     */
+    path?: string;
+    /**
+     * 
+     * @type {Date}
+     * @memberof ErrorResponse
+     */
+    timestamp?: Date;
+    /**
+     * 
      * @type {Array<ErrorField>}
      * @memberof ErrorResponse
      */
@@ -57,7 +69,10 @@ export function ErrorResponseFromJSONTyped(json: any, ignoreDiscriminator: boole
         return json;
     }
     return {
+        
         'message': json['message'] == null ? undefined : json['message'],
+        'path': json['path'] == null ? undefined : json['path'],
+        'timestamp': json['timestamp'] == null ? undefined : (new Date(json['timestamp'])),
         'details': json['details'] == null ? undefined : ((json['details'] as Array<any>).map(ErrorFieldFromJSON)),
     };
 }
@@ -72,7 +87,10 @@ export function ErrorResponseToJSONTyped(value?: ErrorResponse | null, ignoreDis
     }
 
     return {
+        
         'message': value['message'],
+        'path': value['path'],
+        'timestamp': value['timestamp'] == null ? undefined : ((value['timestamp']).toISOString()),
         'details': value['details'] == null ? undefined : ((value['details'] as Array<any>).map(ErrorFieldToJSON)),
     };
 }
