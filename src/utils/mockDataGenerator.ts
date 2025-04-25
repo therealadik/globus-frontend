@@ -42,10 +42,10 @@ export const generateTransaction = (banks: Bank[], categories: Category[]): Tran
   const bankSender = banks[Math.floor(Math.random() * banks.length)];
   const bankReceiver = banks[Math.floor(Math.random() * banks.length)];
   const category = categories[Math.floor(Math.random() * categories.length)];
-  
+
   return {
     id: Math.floor(Math.random() * 1000000),
-    transactionDate: "01.01.2025",
+    transactionDate: new Date().toISOString(),
     personType: Math.random() > 0.5 ? 'PHYSICAL' as PersonType : 'LEGAL' as PersonType,
     transactionType: Math.random() > 0.5 ? 'INCOME' as TransactionType : 'EXPENSE' as TransactionType,
     amount,

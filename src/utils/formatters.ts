@@ -1,6 +1,20 @@
-export const formatAmount = (value: string) => {
-  const numbers = value.replace(/\D/g, '');
-  return numbers.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽';
+export const formatAmount = (value: string | number) => {
+  let numValue: number;
+  
+  if (typeof value === 'string') {
+    // Для строки: удаляем все нецифровые символы и делим на 100 для учета копеек
+    numValue = parseFloat(value.replace(/\D/g, '')) / 100;
+  } else {
+    // Для числа: округляем до 2 знаков после запятой
+    numValue = Math.round(value * 100) / 100;
+  }
+
+  return new Intl.NumberFormat('ru-RU', {
+    style: 'currency',
+    currency: 'RUB',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(numValue);
 };
 
 export const formatPhone = (value: string) => {
@@ -21,6 +35,18 @@ export const formatAccount = (value: string) => {
 };
 
 export const formatDate = (value: string) => {
+  // Если это ISO строка, конвертируем в локальную дату
+  if (value.includes('T')) {
+    const date = new Date(value);
+    return date.toLocaleDateString('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      timeZone: 'Europe/Moscow'
+    });
+  }
+
+  // Если это строка в формате DD.MM.YYYY, форматируем как есть
   const numbers = value.replace(/\D/g, '');
   if (numbers.length <= 2) return numbers;
   if (numbers.length <= 4) return `${numbers.slice(0, 2)}.${numbers.slice(2)}`;

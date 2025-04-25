@@ -6,7 +6,7 @@ import {
   TransactionFilterDto,
   TransactionFilterResponseDto
 } from '../generated/src/models';
-import { handleApiError } from '../../utils/errorHandler';
+import { displayApiError } from '../../utils/errorHandler';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
@@ -24,8 +24,8 @@ export const transactionsService = {
     try {
       return await apiClient.create({ newTransactionRequestDto: transaction });
     } catch (error: any) {
-      const apiError = await handleApiError(error);
-      throw apiError;
+      await displayApiError(error);
+      throw error;
     }
   },
   update: async (id: number, transaction: NewTransactionRequestDto): Promise<TransactionResponseDto> => {
@@ -37,32 +37,32 @@ export const transactionsService = {
         }
       });
     } catch (error: any) {
-      const apiError = await handleApiError(error);
-      throw apiError;
+      await displayApiError(error);
+      throw error;
     }
   },
   delete: async (id: number): Promise<void> => {
     try {
       await apiClient.deleteTransaction({ id });
     } catch (error: any) {
-      const apiError = await handleApiError(error);
-      throw apiError;
+      await displayApiError(error);
+      throw error;
     }
   },
   findTransactionsByFilter: async (filter: TransactionFilterDto): Promise<TransactionFilterResponseDto> => {
     try {
       return await apiClient.findTransactionsByFilter({ transactionFilterDto: filter });
     } catch (error: any) {
-      const apiError = await handleApiError(error);
-      throw apiError;
+      await displayApiError(error);
+      throw error;
     }
   },
   getPdfReport: async (): Promise<string> => {
     try {
       return await apiClient.getPdfReport();
     } catch (error: any) {
-      const apiError = await handleApiError(error);
-      throw apiError;
+      await displayApiError(error);
+      throw error;
     }
   }
 }; 

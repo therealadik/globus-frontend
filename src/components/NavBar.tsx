@@ -1,6 +1,9 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAppState } from '../context/AppStateContext';
+import { useToast } from '../context/ToastContext';
+import { displayApiError } from '../utils/errorHandler';
+import html2PDF from 'jspdf-html2canvas-pro';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -14,17 +17,52 @@ const navigation = [
 
 const NavBar: React.FC = () => {
   const { appState } = useAppState();
+  const { showError } = useToast();
+  const location = useLocation();
+
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('username');
     window.location.href = '/login';
   };
 
-  const location = useLocation();
+  const handleDownloadReport = async () => {
+    try {
+      const dashboardElement = document.querySelector('.dashboard-content') as HTMLElement;
+      if (!dashboardElement) {
+        throw new Error('Dashboard content not found');
+      }
+      await html2PDF(dashboardElement, {
+        jsPDF: {
+          format: 'a4',
+          orientation: 'portrait',
+          unit: 'mm'
+        },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          logging: true,
+          scrollX: 0,
+          scrollY: -window.scrollY
+        },
+        margin: {
+          top: 10,
+          right: 10,
+          bottom: 10,
+          left: 10
+        },
+        output: `financial-report-${new Date().toISOString().split('T')[0]}.pdf`
+      });
+    } catch (error) {
+      await displayApiError(error, showError);
+    }
+  };
 
   const isActive = (path: string) => {
     return location.pathname === path;
   };
+
+  const isDashboardPage = location.pathname === '/';
 
   return (
     <nav className="bg-white shadow">
@@ -55,6 +93,14 @@ const NavBar: React.FC = () => {
           </div>
           <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
             <div className="flex items-center space-x-4">
+              {isDashboardPage && (
+                <button
+                  onClick={handleDownloadReport}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Скачать отчет
+                </button>
+              )}
               <span className="text-gray-600">{appState.auth.username}</span>
               <button
                 onClick={handleLogout}

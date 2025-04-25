@@ -1,20 +1,20 @@
-import { Transaction } from './transaction';
 import { Bank, Category } from './common';
+import { TransactionFilterResponseDto } from '../api/generated/src/models';
 
 export interface AppState {
   auth: {
     token: string | null;
     username: string | null;
   };
-  transactions: {
-    items: Transaction[];
-    isLoading: boolean;
-    error: string | null;
-  };
   metrics: {
     totalIncome: number;
     totalExpenses: number;
     balance: number;
+  };
+  dashboard: {
+    data: TransactionFilterResponseDto | null;
+    isLoading: boolean;
+    error: string | null;
   };
   banks: Bank[];
   categories: Category[];

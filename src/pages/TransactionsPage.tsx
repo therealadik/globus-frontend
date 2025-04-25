@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
-import BalanceOverview from '../components/BalanceOverview';
-import TransactionForm from '../components/TransactionForm';
+import React, { useState, useEffect } from 'react';
 import TransactionCard from '../components/TransactionCard';
 import TransactionModal from '../components/TransactionModal';
+import FilterForm from '../components/FilterForm';
 import { transactionsService } from '../api/services/transactionsService';
 import { Transaction } from '../types/transaction';
 import { useAppState } from '../context/AppStateContext';
+import { TransactionFilterDto, TransactionResponseDto } from '../api/generated/src/models';
+import { useToast } from '../context/ToastContext';
+import { displayApiError } from '../utils/errorHandler';
+import { localToUtc } from '../utils/timezone';
 
 const calculateMetrics = (transactions: Transaction[]) => {
   return transactions.reduce(
@@ -21,10 +24,70 @@ const calculateMetrics = (transactions: Transaction[]) => {
   );
 };
 
+const convertToTransaction = (dto: TransactionResponseDto): Transaction => {
+  if (!dto.id) {
+    throw new Error('Transaction ID is required');
+  }
+  return {
+    id: dto.id,
+    transactionDate: dto.transactionDate?.toISOString() || new Date().toISOString(),
+    personType: dto.personType || 'PHYSICAL',
+    transactionType: dto.transactionType || 'INCOME',
+    amount: dto.amount || 0,
+    status: dto.status || 'NEW',
+    bankSenderId: dto.bankSenderId || 0,
+    bankReceiverId: dto.bankReceiverId || 0,
+    innReceiver: dto.innReceiver || '',
+    accountReceiver: dto.accountReceiver || '',
+    accountSender: dto.accountSender || '',
+    categoryId: dto.categoryId || 0,
+    phoneReceiver: dto.phoneReceiver || ''
+  };
+};
+
 const TransactionsPage: React.FC = () => {
   const { appState, setAppState } = useAppState();
+  const { showError } = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+
+  const loadTransactions = async (filter?: TransactionFilterDto) => {
+    try {
+      const response = await transactionsService.findTransactionsByFilter(filter || {});
+      
+      // Combine debit and credit transactions and sort by date
+      const allTransactions = [
+        ...(response.debitCreditTransactions?.debitTransactions || []),
+        ...(response.debitCreditTransactions?.creditTransactions || [])
+      ]
+        .map(convertToTransaction)
+        .sort((a, b) => new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime());
+
+      setAppState(prev => {
+        const metrics = calculateMetrics(allTransactions);
+        metrics.balance = metrics.totalIncome - metrics.totalExpenses;
+        return {
+          ...prev,
+          metrics,
+          dashboard: {
+            data: response,
+            isLoading: false,
+            error: null
+          }
+        };
+      });
+    } catch (error) {
+      await displayApiError(error, showError);
+      setAppState(prev => ({
+        ...prev,
+        dashboard: {
+          ...prev.dashboard,
+          isLoading: false,
+          error: 'Failed to load dashboard data'
+        }
+      }));
+    }
+  };
 
   const handleTransactionSubmit = async (data: Omit<Transaction, 'id'>) => {
     try {
@@ -35,65 +98,36 @@ const TransactionsPage: React.FC = () => {
           ...data
         };
 
+        // Convert local date to UTC before sending to server
+        const utcDate = localToUtc(new Date(data.transactionDate));
+
         // Send to server
         await transactionsService.update(updatedTransaction.id, {
           ...data,
-          transactionDate: new Date(data.transactionDate)
+          transactionDate: utcDate
         });
 
-        // Update state with updated transaction
-        setAppState(prev => {
-          const newTransactions = prev.transactions.items.map(t => 
-            t.id === editingTransaction.id ? updatedTransaction : t
-          );
-          const metrics = calculateMetrics(newTransactions);
-          metrics.balance = metrics.totalIncome - metrics.totalExpenses;
-
-          return {
-            ...prev,
-            transactions: {
-              ...prev.transactions,
-              items: newTransactions
-            },
-            metrics
-          };
-        });
-
+        // Reload transactions after update
+        await loadTransactions();
         setEditingTransaction(null);
       } else {
-        // Create new transaction
-        const newTransaction: Transaction = {
-          ...data,
-          id: Math.floor(Math.random() * 1000000),
-        };
+        // Convert local date to UTC before sending to server
+        const utcDate = localToUtc(new Date(data.transactionDate));
 
         // Send to server
         await transactionsService.create({
           ...data,
-          transactionDate: new Date(data.transactionDate)
+          transactionDate: utcDate
         });
 
-        // Update state with new transaction
-        setAppState(prev => {
-          const newTransactions = [newTransaction, ...prev.transactions.items];
-          const metrics = calculateMetrics(newTransactions);
-          metrics.balance = metrics.totalIncome - metrics.totalExpenses;
-
-          return {
-            ...prev,
-            transactions: {
-              ...prev.transactions,
-              items: newTransactions
-            },
-            metrics
-          };
-        });
+        // Reload transactions after create
+        await loadTransactions();
       }
 
       // Close modal after successful submission
       setIsModalOpen(false);
     } catch (error) {
-      throw error; // Re-throw to be caught by form
+      await displayApiError(error, showError);
     }
   };
 
@@ -102,15 +136,31 @@ const TransactionsPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  const handleFilter = async (filter: TransactionFilterDto) => {
+    await loadTransactions(filter);
+  };
+
+  const handleResetFilter = async () => {
+    await loadTransactions();
+  };
+
+  const handleDeleteTransaction = async () => {
+    await loadTransactions();
+  };
+
+  // Get transactions from dashboard data
+  const transactions = appState.dashboard.data ? [
+    ...(appState.dashboard.data.debitCreditTransactions?.debitTransactions || []),
+    ...(appState.dashboard.data.debitCreditTransactions?.creditTransactions || [])
+  ]
+    .map(convertToTransaction)
+    .sort((a, b) => new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime()) : [];
+
   return (
     <>
-      <div className="bg-white shadow rounded-lg p-6 mb-6">
-        <BalanceOverview />
-      </div>
-
-      <div className="grid grid-cols-1 gap-6">
-        {/* Transactions List */}
-        <div className="bg-white shadow rounded-lg p-6 h-[720px] overflow-y-auto">
+      <div className="grid grid-cols-12 gap-6">
+        {/* Transactions List - Takes 8 columns */}
+        <div className="col-span-8 bg-white shadow rounded-lg p-6 h-[720px] overflow-y-auto">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900">История транзакций</h2>
             <button
@@ -123,15 +173,32 @@ const TransactionsPage: React.FC = () => {
               Создать транзакцию
             </button>
           </div>
-          <div className="space-y-4">
-            {appState.transactions.items.map(transaction => (
-              <TransactionCard 
-                key={transaction.id} 
-                transaction={transaction}
-                onEdit={handleEditTransaction}
-              />
-            ))}
+
+          {/* Transactions List */}
+          <div className="flex-1 overflow-y-auto">
+            {appState.dashboard.isLoading ? (
+              <div className="flex justify-center items-center h-32">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {transactions.map(transaction => (
+                  <TransactionCard 
+                    key={transaction.id} 
+                    transaction={transaction}
+                    onEdit={handleEditTransaction}
+                    onDelete={handleDeleteTransaction}
+                  />
+                ))}
+              </div>
+            )}
           </div>
+        </div>
+
+        {/* Filter Form - Takes 4 columns */}
+        <div className="col-span-4 bg-white shadow rounded-lg p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Фильтры</h2>
+          <FilterForm onFilter={handleFilter} onReset={handleResetFilter} />
         </div>
       </div>
 

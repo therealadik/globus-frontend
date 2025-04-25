@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { authService } from '../api/services/authService';
 import authBg from '../assets/auth-bg.png';
 import { AuthenticationResponseDto } from '../api/generated/src/models';
-import ApiErrorViewer from '../components/ApiErrorViewer';
 import { ApiError } from '../types/api';
+import { useToast } from '../context/ToastContext';
+import { displayApiError } from '../utils/errorHandler';
 
 interface AuthFormData {
   username: string;
@@ -16,8 +17,8 @@ const AuthPage = () => {
     username: '',
     password: '',
   });
-  const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
+  const { showError } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -29,7 +30,6 @@ const AuthPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setLoading(true);
 
     try {
@@ -43,13 +43,7 @@ const AuthPage = () => {
         window.location.href = '/';
       }
     } catch (error) {
-      if (error && typeof error === 'object' && 'message' in error) {
-        setError(error as ApiError);
-      } else {
-        setError({
-          message: 'Произошла неизвестная ошибка'
-        });
-      }
+      await displayApiError(error, showError);
     } finally {
       setLoading(false);
     }
@@ -104,8 +98,6 @@ const AuthPage = () => {
                   placeholder="Введите пароль"
                 />
               </div>
-
-              {error && <ApiErrorViewer error={error} />}
 
               <button
                 type="submit"

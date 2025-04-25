@@ -1,29 +1,41 @@
 import { ErrorResponse } from '../api/generated/src/models';
 import { ApiError } from '../types/api';
 
-export const handleApiError = async (error: any): Promise<ApiError> => {
+export const displayApiError = async (error: any, onError?: (error: ApiError) => void): Promise<void> => {
+  let apiError: ApiError;
+
   if (error.response) {
     try {
-      // Clone the response before reading it
       const response = error.response.clone();
       const errorData: ErrorResponse = await response.json();
-      console.log('Error data from server:', errorData);
       
-      return {
+      apiError = {
         message: errorData.message || `Ошибка ${error.response.status}`,
-        details: errorData.details?.map(detail => ({
+        details: errorData.details ? errorData.details.map(detail => ({
           field: detail.field || '',
           message: detail.message || ''
-        }))
+        })) : undefined
       };
     } catch (e) {
-      console.error('Error parsing error response:', e);
-      return {
+      apiError = {
         message: `Ошибка ${error.response.status}`
       };
     }
+  } else if (error.message) {
+    // Handle error object with message property
+    apiError = {
+      message: error.message,
+      details: error.details
+    };
+  } else {
+    console.log("API error", error);
+    apiError = {
+      message: 'Произошла ошибка при выполнении запроса'
+    };
   }
-  return {
-    message: 'Произошла ошибка при выполнении запроса'
-  };
+
+  // Call the error callback if provided
+  if (onError) {
+    onError(apiError);
+  }
 }; 

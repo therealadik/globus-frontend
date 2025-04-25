@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Transaction, TransactionStatus, PersonType, TransactionType, createTransaction } from '../types/transaction';
-import ApiErrorViewer from './ApiErrorViewer';
-import { ApiError } from '../types/api';
 import { FaRandom } from 'react-icons/fa';
 import { useAppState } from '../context/AppStateContext';
+import { useToast } from '../context/ToastContext';
 import FancySelect from './FancySelect';
 import Switch from './Switch';
 import { generateTransaction } from '../utils/mockDataGenerator';
 import { formatAmount, formatPhone, formatAccount, formatDate } from '../utils/formatters';
 import { PERSON_TYPE_OPTIONS, TRANSACTION_TYPE_OPTIONS, TRANSACTION_STATUS_OPTIONS } from '../constants/transaction';
+import { displayApiError } from '../utils/errorHandler';
 
 interface TransactionFormProps {
   onSubmit: (data: Omit<Transaction, 'id'>) => Promise<void>;
@@ -17,9 +17,9 @@ interface TransactionFormProps {
 
 const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, initialData }) => {
   const { appState } = useAppState();
+  const { showError } = useToast();
   const [formData, setFormData] = useState<Transaction>(initialData || createTransaction());
   const [displayData, setDisplayData] = useState(formatTransaction(formData));
-  const [error, setError] = useState<ApiError | null>(null);
   const isEditing = !!initialData;
 
   useEffect(() => {
@@ -31,7 +31,7 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, initialData
 
   function formatTransaction(transaction: Transaction) {
     return {
-      amount: formatAmount(transaction.amount.toString()),
+      amount: transaction.amount ? formatAmount(transaction.amount) : formatAmount(0),
       bankSenderId: { id: transaction.bankSenderId, name: appState.banks.find(b => b.id === transaction.bankSenderId)?.name || '', value: transaction.bankSenderId },
       bankReceiverId: { id: transaction.bankReceiverId, name: appState.banks.find(b => b.id === transaction.bankReceiverId)?.name || '', value: transaction.bankReceiverId },
       innReceiver: transaction.innReceiver,
@@ -48,22 +48,20 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, initialData
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-
     try {
       await onSubmit(formData);
-      
       if (!isEditing) {
         setFormData(createTransaction());
         setDisplayData(formatTransaction(createTransaction()));
       }
-    } catch (error: any) {
-      setError(error);
+    } catch (error) {
+      await displayApiError(error, showError);
     }
   };
 
   const handleRandomData = () => {
     const newTransaction = generateTransaction(appState.banks, appState.categories);
+    newTransaction.id = formData.id
     setFormData(newTransaction);
     setDisplayData(formatTransaction(newTransaction));
   };
@@ -74,9 +72,16 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, initialData
     let rawValue = value;
 
     if (name === 'amount') {
-      rawValue = value.replace(/\D/g, '');
-      formattedValue = formatAmount(rawValue);
-      setFormData(prev => ({ ...prev, [name]: Number(rawValue) }));
+      rawValue = value.replace(/[^\d.]/g, '');
+      const parts = rawValue.split('.');
+      if (parts.length > 2) {
+        rawValue = parts[0] + '.' + parts.slice(1).join('');
+      }
+      if (parts.length > 1) {
+        rawValue = parts[0] + '.' + parts[1].slice(0, 2);
+      }
+      formattedValue = formatAmount(rawValue || '0');
+      setFormData(prev => ({ ...prev, [name]: Number(rawValue || '0') / 100 }));
     } else if (name === 'phoneReceiver') {
       rawValue = value.replace(/\D/g, '');
       formattedValue = formatPhone(rawValue);
@@ -274,8 +279,6 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, initialData
               />
             </div>
           </div>
-
-          {error && <ApiErrorViewer error={error} />}
 
           <div className="flex justify-end">
             <button
