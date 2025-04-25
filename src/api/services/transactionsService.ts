@@ -1,6 +1,11 @@
 import { Configuration } from '../generated/src';
 import { TransactionControllerApi } from '../generated/src/apis';
-import { NewTransactionRequestDto, TransactionResponseDto } from '../generated/src/models';
+import { 
+  NewTransactionRequestDto, 
+  TransactionResponseDto,
+  TransactionFilterDto,
+  TransactionFilterResponseDto
+} from '../generated/src/models';
 import { handleApiError } from '../../utils/errorHandler';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
@@ -31,6 +36,30 @@ export const transactionsService = {
           id
         }
       });
+    } catch (error: any) {
+      const apiError = await handleApiError(error);
+      throw apiError;
+    }
+  },
+  delete: async (id: number): Promise<void> => {
+    try {
+      await apiClient.deleteTransaction({ id });
+    } catch (error: any) {
+      const apiError = await handleApiError(error);
+      throw apiError;
+    }
+  },
+  findTransactionsByFilter: async (filter: TransactionFilterDto): Promise<TransactionFilterResponseDto> => {
+    try {
+      return await apiClient.findTransactionsByFilter({ transactionFilterDto: filter });
+    } catch (error: any) {
+      const apiError = await handleApiError(error);
+      throw apiError;
+    }
+  },
+  getPdfReport: async (): Promise<string> => {
+    try {
+      return await apiClient.getPdfReport();
     } catch (error: any) {
       const apiError = await handleApiError(error);
       throw apiError;
